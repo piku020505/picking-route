@@ -60,6 +60,11 @@ def reslot_skus(
     df_classified, _ = perform_abc_analysis(df_orderlines)
     sku_col = 'SKU' if 'SKU' in df_classified.columns else ('Ref' if 'Ref' in df_classified.columns else 'Coord')
 
+    if 'x' not in df_classified.columns or 'y' not in df_classified.columns:
+        parsed_c = [eval(c) if isinstance(c, str) else c for c in df_classified['Coord']]
+        df_classified['x'] = [c[0] for c in parsed_c]
+        df_classified['y'] = [c[1] for c in parsed_c]
+
     # Get unique physical storage locations sorted by distance to depot [0, y_low]
     unique_locations = df_classified[['x', 'y']].drop_duplicates().copy()
     unique_locations['depot_dist'] = unique_locations['x'] + (unique_locations['y'] - y_low).abs()
