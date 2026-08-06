@@ -70,7 +70,7 @@ with st.sidebar:
                            "clustering + centroids for multi-line orders. Roughly 3× slower than Simulation 1.")
 
     st.divider()
-    st.markdown("Warehouse Order Batching & Picking Route Optimization App 📦 · Developed independently")
+    st.markdown("Warehouse Order Batching & Picking Route Optimization App 📦 · Made by [piku020505](https://github.com/piku020505)")
 
 lines_number = scope * 1000
 
