@@ -40,6 +40,27 @@ Then open [http://localhost:8501](http://localhost:8501) — details in the **Bu
 - **Spatial Clustering**: Using spatial algorithms (e.g. Scipy hierarchical clustering / centroids) to group order lines in close physical proximity.
 - **Pathfinding Optimization**: Routing pickers through warehouse storage locations using Single Picker Routing heuristics.
 
+---
+
+## 🏆 Executive Summary & Key Benchmark Results
+
+Benchmarked on **5,000 real warehouse order lines** across wave sizes, spatial clustering, routing heuristics, and SKU slotting strategies:
+
+| Operational Metric | Baseline (1 Order/Wave) | Optimized Strategy | Gain / Impact |
+| :--- | :--- | :--- | :--- |
+| **Total Walking Distance** | 165,190 m | **27,249 m** *(Method 3, Wave Size 9)* | **-83.5% distance reduction** (137.9 km saved) |
+| **Daily Labor Cost** | ₹95,596 / day | **₹15,769 / day** *(10 pickers @ ₹250/hr)* | **₹79,827 / day saved** |
+| **Annualized Cost Savings** | — | **₹2.39 Crore / year** *(300 days/yr)* | **₹2,39,48,088 / year** financial savings |
+| **Shift Walking Hours** | 382.4 hrs / shift | **63.1 hrs / shift** | **319.3 picker-hours saved / shift** |
+| **Compounding ABC Slotting** | 32,943 m *(Original)* | **4,957 m** *(ABC Reslot + Batching)* | **-84.9% compounding reduction** |
+
+### 🥇 Routing Heuristics Comparative Benchmark Findings
+- **Next Closest Location (Greedy)**: **Winner** (1,585 m average route length)
+- **S-Shape (Serpentine)**: 1,779 m (**+12.2%** longer than Next Closest)
+- **Return Routing**: 2,146 m (**+35.4%** longer than Next Closest)
+
+---
+
 
 # Picking Route Optimisation 🚶‍♂️ 
 
