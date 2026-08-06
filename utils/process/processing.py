@@ -11,14 +11,16 @@ def process_lines(df_orderlines):
     list_lines = list(df_nline['SKU'].values.astype(int))
 
     # Mapping
-    dict_nline = dict(zip(list_ord, list_lines))
+    dict_nline = dict(zip(list_ord, list_lines, strict=False))
     df_orderlines['N_lines'] = df_orderlines['OrderNumber'].map(dict_nline)
 
     # Processing
-    df_mono, df_multi = df_orderlines[df_orderlines['N_lines'] == 1], df_orderlines[df_orderlines['N_lines'] > 1]
+    df_mono = df_orderlines[df_orderlines['N_lines'] == 1]
+    df_multi = df_orderlines[df_orderlines['N_lines'] > 1]
     del df_orderlines
 
     return df_mono, df_multi
+
 
 def monomult_concat(df_mono, df_multi):
     ''' Concat mono-line and multi-lines orders'''
@@ -27,6 +29,9 @@ def monomult_concat(df_mono, df_multi):
     # Dataframe Concatenation
     df_orderlines = pd.concat([df_mono, df_multi])
     # Counting number of Waves
-    waves_number = int(df_orderlines.WaveID.max() + 1) if not df_orderlines.empty and pd.notna(df_orderlines.WaveID.max()) else 0
+    if not df_orderlines.empty and pd.notna(df_orderlines.WaveID.max()):
+        waves_number = int(df_orderlines.WaveID.max() + 1)
+    else:
+        waves_number = 0
 
     return df_orderlines, waves_number

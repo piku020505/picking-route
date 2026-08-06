@@ -1,21 +1,18 @@
 '''ABC Slotting and Layout Optimization module:
 Performs ABC SKU demand velocity classification and simulates re-slotting fast-moving SKUs
-closer to the depot, measuring the compounding effect with order batching strategies.
+closer to the depot, measuring the compounding effect with order batching strategies and
+the interplay with routing heuristics (S-Shape vs Next Closest vs Return).
 '''
 
 import pandas as pd
 
-from utils.batch.simulation_batch import simulate_batch
+from utils.batch.simulation_batch import simulation_batch
 from utils.cluster.simulation_cluster import simulation_cluster
+from utils.routing.heuristics import benchmark_routing_heuristics
 
 
 def perform_abc_analysis(df_orderlines: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    '''Perform Pareto ABC analysis on SKUs based on picking frequency.
-
-    Class A: Top 70% of total pick lines (~20% SKUs)
-    Class B: Next 20% of total pick lines (~30% SKUs)
-    Class C: Remaining 10% of pick lines (~50% SKUs)
-    '''
+    '''Perform Pareto ABC analysis on SKUs based on picking frequency.'''
     df = df_orderlines.copy()
     sku_col = 'SKU' if 'SKU' in df.columns else ('Ref' if 'Ref' in df.columns else 'Coord')
 
@@ -103,31 +100,28 @@ def evaluate_slotting_impact(
     y_low: float = 5.5,
     y_high: float = 50.0,
 ) -> pd.DataFrame:
-    '''Evaluate picking distance for 4 scenarios to demonstrate compounding gains:
-    1. Baseline (Original Layout, 1 order/wave)
-    2. Batching Only (Original Layout, Wave Size N)
-    3. Re-slotting Only (Re-slotted Layout, 1 order/wave)
-    4. Compounding (Re-slotted Layout + Batching Wave Size N)
-    '''
+    '''Evaluate picking distance for 4 scenarios to demonstrate compounding gains.'''
     df_reslotted = reslot_skus(df_orderlines, y_low, y_high)
     n_lines = len(df_orderlines)
     origin_loc = [0, y_low]
 
     # Scenario 1: Original + Baseline (1 order/wave)
-    _, res1 = simulate_batch(1, 2, y_low, y_high, origin_loc, n_lines, df_orderlines.copy())
+    _, res1 = simulation_batch(1, 2, y_low, y_high, origin_loc, n_lines, df_orderlines.copy())
     dist_orig_base = res1.iloc[0]['distance']
 
     # Scenario 2: Original + Batching Wave N
-    _, res2 = simulate_batch(wave_size, wave_size + 1, y_low, y_high, origin_loc, n_lines, df_orderlines.copy())
+    _, res2 = simulation_batch(wave_size, wave_size + 1, y_low, y_high, origin_loc, n_lines, df_orderlines.copy())
     dist_orig_batch = res2.iloc[0]['distance']
 
     # Scenario 3: Re-slotted + Baseline (1 order/wave)
-    _, res3 = simulate_batch(1, 2, y_low, y_high, origin_loc, n_lines, df_reslotted.copy())
+    _, res3 = simulation_batch(1, 2, y_low, y_high, origin_loc, n_lines, df_reslotted.copy())
     dist_reslot_base = res3.iloc[0]['distance']
 
     # Scenario 4: Re-slotted + Batching Wave N
     list_res = [[], [], [], [], [], [], []]
-    res4, _ = simulation_cluster(y_low, y_high, df_reslotted.copy(), list_res, wave_size, wave_size + 1, distance_threshold)
+    res4, _ = simulation_cluster(
+        y_low, y_high, df_reslotted.copy(), list_res, wave_size, wave_size + 1, distance_threshold
+    )
     dist_compounding = res4.loc[wave_size, 'distance_method_3']
 
     df_compounding = pd.DataFrame([
@@ -154,3 +148,41 @@ def evaluate_slotting_impact(
     ])
 
     return df_compounding
+
+
+def evaluate_slotting_heuristics_interplay(
+    df_orderlines: pd.DataFrame,
+    y_low: float = 5.5,
+    y_high: float = 50.0,
+) -> pd.DataFrame:
+    '''Evaluate interplay between ABC SKU re-slotting layout and routing heuristics.'''
+    df_reslotted = reslot_skus(df_orderlines, y_low, y_high)
+    origin_loc = [0, y_low]
+
+    def extract_locs(df):
+        coords = [eval(c) if isinstance(c, str) else c for c in df['Coord']]
+        unique_locs = []
+        for c in coords:
+            if c not in unique_locs:
+                unique_locs.append(c)
+        return unique_locs
+
+    orig_locs = extract_locs(df_orderlines)
+    reslot_locs = extract_locs(df_reslotted)
+
+    bench_orig = benchmark_routing_heuristics(origin_loc, orig_locs, y_low, y_high)
+    bench_reslot = benchmark_routing_heuristics(origin_loc, reslot_locs, y_low, y_high)
+
+    records = []
+    for h_name in ['Next Closest', 'S-Shape', 'Return']:
+        d_orig = bench_orig[h_name]['distance']
+        d_reslot = bench_reslot[h_name]['distance']
+        gain_pct = round((1 - d_reslot / d_orig) * 100.0, 1) if d_orig > 0 else 0.0
+        records.append({
+            'Routing Heuristic': h_name,
+            'Original Layout Distance (m)': round(d_orig, 2),
+            'Re-slotted Layout Distance (m)': round(d_reslot, 2),
+            'Re-slotting Gain (%)': gain_pct,
+        })
+
+    return pd.DataFrame(records)

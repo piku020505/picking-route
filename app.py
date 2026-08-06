@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-from utils.batch.simulation_batch import simulate_batch
+from utils.batch.simulation_batch import simulation_batch
 from utils.cluster.simulation_cluster import simulation_cluster
 from utils.cost.cost_model import compare_financial_savings
 from utils.data.generator import generate_synthetic_orderlines
@@ -17,7 +17,11 @@ from utils.results.plot import (
 )
 from utils.routing.heuristics import benchmark_routing_heuristics
 from utils.sensitivity.sensitivity import run_sensitivity_analysis
-from utils.slotting.slotting import evaluate_slotting_impact, perform_abc_analysis
+from utils.slotting.slotting import (
+    evaluate_slotting_heuristics_interplay,
+    evaluate_slotting_impact,
+    perform_abc_analysis,
+)
 
 # --- Page configuration -------------------------------------------------------
 st.set_page_config(
@@ -49,7 +53,7 @@ def load(n):
 def run_simulation_1(lines_number, n1, n2):
     '''Simulation 1: total walking distance for each wave size in [n1, n2]'''
     df_orderlines = load(lines_number)
-    _, df_results = simulate_batch(n1, n2, Y_LOW, Y_HIGH, ORIGIN_LOC, lines_number, df_orderlines)
+    _, df_results = simulation_batch(n1, n2, Y_LOW, Y_HIGH, ORIGIN_LOC, lines_number, df_orderlines)
     return df_results
 
 
@@ -68,7 +72,6 @@ def run_heuristics_benchmark(lines_number, n1, n2):
     df_orderlines = load(lines_number)
     records = []
     for wave_size in range(n1, n2 + 1):
-        # Sample order lines for wave
         df_wave = df_orderlines.head(wave_size * 10)
         locations = []
         for coord_str in df_wave['Coord']:
@@ -94,34 +97,37 @@ with st.sidebar:
     st.caption("Simulate order batching, spatial clustering, routing heuristics, and cost savings.")
 
     st.header("⚙️ Simulation Parameters")
-    scope = st.slider("Scope (thousand order lines)", 1, max_scope, min(5, max_scope),
-                      help="Number of order lines included in the simulations — "
-                           f"the loaded dataset has {dataset_size():,} lines.")
-    n1 = st.slider("N_MIN (orders/wave)", 1, 20, 1,
-                   help="Smallest wave size to simulate.")
-    n2 = st.slider("N_MAX (orders/wave)", n1 + 1, 20, max(n1 + 1, 10),
-                   help="Largest wave size to simulate.")
-    distance_threshold = st.slider("Distance Threshold (m)", 10, 60, 35,
-                                   help="Clustering threshold distance (m) between picking locations.")
+    scope = st.slider(
+        "Scope (thousand order lines)", 1, max_scope, min(5, max_scope),
+        help=f"Number of order lines included — loaded dataset has {dataset_size():,} lines."
+    )
+    n1 = st.slider("N_MIN (orders/wave)", 1, 20, 1, help="Smallest wave size to simulate.")
+    n2 = st.slider("N_MAX (orders/wave)", n1 + 1, 20, max(n1 + 1, 10), help="Largest wave size to simulate.")
+    distance_threshold = st.slider(
+        "Distance Threshold (m)", 10, 60, 35, help="Clustering threshold distance (m) between picking locations."
+    )
 
     st.header("💰 Financial Cost Layer")
-    walking_speed = st.number_input("Walking Speed (m/s)", 0.5, 3.0, 1.2, step=0.1,
-                                    help="Average walking speed of warehouse pickers.")
-    hourly_wage = st.number_input("Picker Hourly Wage (₹/hr)", 50.0, 2000.0, 250.0, step=10.0,
-                                  help="Hourly labor wage per picker in Indian Rupees (₹).")
+    walking_speed = st.number_input("Walking Speed (m/s)", 0.5, 3.0, 1.2, step=0.1)
+    hourly_wage = st.number_input("Picker Hourly Wage (₹/hr)", 50.0, 2000.0, 250.0, step=10.0)
     shift_hours = st.number_input("Shift Duration (hours)", 4.0, 12.0, 8.0, step=0.5)
     num_pickers = st.number_input("Active Pickers Count", 1, 100, 10, step=1)
     seconds_per_line = st.number_input("Pick Time per Line (s)", 5.0, 60.0, 15.0, step=1.0)
 
     st.divider()
-    st.markdown("Warehouse Order Batching & Picking Route Optimization App 📦 · Made by [piku020505](https://github.com/piku020505)")
+    st.markdown(
+        "Warehouse Order Batching & Picking Route Optimization App 📦 · "
+        "Made by [piku020505](https://github.com/piku020505)"
+    )
 
 lines_number = scope * 1000
 
 # --- Main page -----------------------------------------------------------------
 st.title("📦 Improve Warehouse Productivity using Order Batching & Routing")
-st.markdown(f"Simulating **{lines_number:,} order lines** with wave sizes from **{n1}** to **{n2} orders/wave** — "
-            "tune parameters in the sidebar to observe real-time operational impacts.")
+st.markdown(
+    f"Simulating **{lines_number:,} order lines** with wave sizes from **{n1}** to **{n2} orders/wave** — "
+    "tune parameters in the sidebar to observe real-time operational impacts."
+)
 
 tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "🥇 Wave Size Impact",
@@ -145,22 +151,29 @@ with tab1:
 
     col1, col2, col3 = st.columns(3)
     col1.metric(f"Baseline — {int(base['order_per_wave'])} order(s)/wave", f"{base['distance']:,.0f} m")
-    col2.metric(f"Best — {int(best['order_per_wave'])} orders/wave", f"{best['distance']:,.0f} m",
-                delta=f"-{saving:.0%} walking distance", delta_color="inverse")
+    col2.metric(
+        f"Best — {int(best['order_per_wave'])} orders/wave", f"{best['distance']:,.0f} m",
+        delta=f"-{saving:.0%} walking distance", delta_color="inverse"
+    )
     col3.metric("Order lines simulated", f"{lines_number:,}")
 
     plot_simulation1(df_results, lines_number)
 
     with st.expander("📄 Results table"):
-        st.dataframe(df_results.rename(columns={"order_per_wave": "Wave size (orders/wave)",
-                                                "distance": "Walking distance (m)"}),
-                     hide_index=True, width="stretch")
+        st.dataframe(
+            df_results.rename(columns={"order_per_wave": "Wave size (orders/wave)",
+                              "distance": "Walking distance (m)"}),
+            hide_index=True, width="stretch"
+        )
 
 # Tab 2: Batching & Clustering
 with tab2:
     st.subheader("Does spatial clustering of picking locations reduce walking distance further?")
-    st.markdown(f"Three wave-creation methods compared — **Method 1**: chronological batching · "
-                f"**Method 2**: single-line clustering · **Method 3**: clustering + centroids for multi-line _(distance threshold: {distance_threshold} m)_.")
+    st.markdown(
+        f"Three wave-creation methods compared — **Method 1**: chronological batching · "
+        f"**Method 2**: single-line clustering · **Method 3**: clustering + centroids "
+        f"_(distance threshold: {distance_threshold} m)_."
+    )
 
     with st.spinner(f"Running the three methods on {lines_number:,} order lines…"):
         df_reswave = run_simulation_2(lines_number, n1, n2, distance_threshold)
@@ -172,35 +185,46 @@ with tab2:
 
     col1, col2, col3 = st.columns(3)
     col1.metric(f"Method 1 — {int(best_n)} orders/wave", f"{m1_val:,.0f} m")
-    col2.metric(f"Method 3 — {int(best_n)} orders/wave", f"{m3_val:,.0f} m",
-                delta=f"-{saving_2:.0%} vs Method 1", delta_color="inverse")
+    col2.metric(
+        f"Method 3 — {int(best_n)} orders/wave", f"{m3_val:,.0f} m",
+        delta=f"-{saving_2:.0%} vs Method 1", delta_color="inverse"
+    )
     col3.metric("Distance threshold", f"{distance_threshold} m")
 
     plot_simulation2(df_reswave, lines_number, distance_threshold)
 
     with st.expander("📄 Results table"):
-        st.dataframe(df_reswave.reset_index().rename(
-            columns={"orders_number": "Wave size (orders/wave)",
-                     "distance_method_1": "Method 1 — No clustering (m)",
-                     "distance_method_2": "Method 2 — Clustering single-line (m)",
-                     "distance_method_3": "Method 3 — Clustering + centroids (m)"}),
-            hide_index=True, width="stretch")
+        st.dataframe(
+            df_reswave.reset_index().rename(
+                columns={
+                    "orders_number": "Wave size (orders/wave)",
+                    "distance_method_1": "Method 1 — No clustering (m)",
+                    "distance_method_2": "Method 2 — Clustering single-line (m)",
+                    "distance_method_3": "Method 3 — Clustering + centroids (m)",
+                }
+            ),
+            hide_index=True, width="stretch"
+        )
 
 # Tab 3: Routing Heuristics Comparison
 with tab3:
     st.subheader("Comparative Study: Next Closest vs S-Shape (Serpentine) vs Return Routing")
-    st.markdown("Benchmarking three classic single picker routing problem (SPRP) heuristics on the exact same dataset.")
+    st.markdown(
+        "Benchmarking three classic single picker routing problem (SPRP) heuristics on the exact same dataset."
+    )
 
     with st.spinner("Benchmarking routing heuristics across wave sizes…"):
         df_bench = run_heuristics_benchmark(lines_number, n1, n2)
 
     plot_heuristics_benchmark(df_bench)
 
-    # Heuristic winner summary
     avg_dists = df_bench.groupby('Heuristic')['Distance (m)'].mean().reset_index()
     winner = avg_dists.loc[avg_dists['Distance (m)'].idxmin()]
 
-    st.success(f"🏆 **Winning Routing Strategy**: **{winner['Heuristic']}** with an average route distance of **{winner['Distance (m)']:,.0f} m** across simulated wave sizes.")
+    st.success(
+        f"🏆 **Winning Routing Strategy**: **{winner['Heuristic']}** "
+        f"with an average route distance of **{winner['Distance (m)']:,.0f} m**."
+    )
 
     with st.expander("📄 Detailed Heuristics Data"):
         st.dataframe(df_bench, hide_index=True, width="stretch")
@@ -208,7 +232,10 @@ with tab3:
 # Tab 4: Financial Cost Layer
 with tab4:
     st.subheader("💰 Financial & Operational Labor Translation")
-    st.markdown("Translating physical picker walking distance reduction into workforce hours, daily labor cost savings (₹), and extra order throughput capacity.")
+    st.markdown(
+        "Translating physical picker walking distance reduction into workforce hours, "
+        "daily labor cost savings (₹), and extra order throughput capacity."
+    )
 
     df_orderlines = load(lines_number)
     df_reswave = run_simulation_2(lines_number, n1, n2, distance_threshold)
@@ -221,24 +248,40 @@ with tab4:
     )
 
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Daily Walking Distance Saved", f"{cost_res['distance_saved_m']:,.0f} m", delta=f"-{cost_res['distance_saved_pct']:.1f}%")
+    c1.metric(
+        "Daily Distance Saved", f"{cost_res['distance_saved_m']:,.0f} m",
+        delta=f"-{cost_res['distance_saved_pct']:.1f}%"
+    )
     c2.metric("Hours Saved per Shift", f"{cost_res['hours_saved_per_shift']:.1f} hrs", delta="Workforce Efficiency")
-    c3.metric("Daily Cost Saved (₹)", f"₹{cost_res['daily_cost_saved_inr']:,.0f}", delta="Labor Savings", delta_color="inverse")
+    c3.metric(
+        "Daily Cost Saved (₹)", f"₹{cost_res['daily_cost_saved_inr']:,.0f}",
+        delta="Labor Savings", delta_color="inverse"
+    )
     c4.metric("Additional Lines / Shift", f"+{cost_res['extra_lines_per_shift']:,} lines", delta="Capacity Expansion")
 
     st.markdown("### 📊 Annualized Financial Impact")
     col_a1, col_a2 = st.columns(2)
     with col_a1:
-        st.info(f"**Annual Labor Cost Savings**: **₹{cost_res['annual_cost_saved_inr']:,.0f} / year** *(assuming 300 operational days/year)*")
+        st.info(
+            f"**Annual Labor Cost Savings**: **₹{cost_res['annual_cost_saved_inr']:,.0f} / year** "
+            "*(assuming 300 operational days/year)*"
+        )
     with col_a2:
-        st.success(f"**Equivalent Picker Productivity Boost**: **+{cost_res['extra_lines_per_shift'] * 300:,.0f} additional pick lines/year** without extra headcount.")
+        st.success(
+            f"**Equivalent Productivity Boost**: **+{cost_res['extra_lines_per_shift'] * 300:,.0f} "
+            "additional pick lines/year** without extra headcount."
+        )
 
 # Tab 5: Sensitivity Analysis
 with tab5:
     st.subheader("🎛️ Sensitivity & Model Robustness Analysis")
-    st.markdown("Evaluating how distance threshold variations shift the optimal wave size $N^*$ and total picking distance.")
+    st.markdown(
+        "Evaluating how distance threshold variations shift the optimal wave size $N^*$ and total walking distance."
+    )
 
-    thresh_input = st.multiselect("Distance Thresholds to Compare (m)", [15, 25, 35, 45, 55], default=[15, 25, 35, 45, 55])
+    thresh_input = st.multiselect(
+        "Distance Thresholds to Compare (m)", [15, 25, 35, 45, 55], default=[15, 25, 35, 45, 55]
+    )
 
     if thresh_input:
         with st.spinner("Running sensitivity matrix simulation…"):
@@ -253,7 +296,10 @@ with tab5:
 # Tab 6: ABC Slotting Optimization
 with tab6:
     st.subheader("🎯 ABC SKU Slotting & Layout Re-allocation")
-    st.markdown("Simulating SKU demand velocity classification (Pareto 80/20) and re-slotting fast-moving Class A items closer to the depot `[0, y_low]`.")
+    st.markdown(
+        "Simulating SKU demand velocity classification (Pareto 80/20) and "
+        "re-slotting fast-moving Class A items closer to the depot `[0, y_low]`."
+    )
 
     df_orderlines = load(lines_number)
     _, df_abc_summary = perform_abc_analysis(df_orderlines)
@@ -263,10 +309,18 @@ with tab6:
 
     st.markdown("### 🚀 Compounding Efficiency Impact (Slotting + Order Batching)")
     with st.spinner("Evaluating compounding slotting & batching scenarios…"):
-        df_compounding = evaluate_slotting_impact(df_orderlines, wave_size=max(n1, 5), distance_threshold=distance_threshold)
+        df_compounding = evaluate_slotting_impact(
+            df_orderlines, wave_size=max(n1, 5), distance_threshold=distance_threshold
+        )
 
     plot_slotting_compounding(df_compounding)
     st.dataframe(df_compounding, hide_index=True, width="stretch")
+
+    st.markdown("### 💡 Interplay of ABC Slotting with Routing Heuristics")
+    st.markdown("Comparing how SKU re-slotting impacts Next Closest, S-Shape, and Return routing heuristics:")
+    with st.spinner("Evaluating slotting & heuristics interplay…"):
+        df_interplay = evaluate_slotting_heuristics_interplay(df_orderlines)
+    st.dataframe(df_interplay, hide_index=True, width="stretch")
 
 # Tab 7: Synthetic Data & Unit Tests
 with tab7:
@@ -295,7 +349,7 @@ with tab7:
 
     with col_s2:
         st.markdown("#### 🧪 Automated Unit Test Suite (Pytest)")
-        st.markdown("Run all 12 unit tests for routing heuristics, cost models, sensitivity analysis, slotting, and data generation.")
+        st.markdown("Run all 13 unit tests for routing heuristics, cost models, sensitivity analysis, and slotting.")
 
         if st.button("▶️ Run Pytest Suite"):
             with st.spinner("Executing test suite…"):

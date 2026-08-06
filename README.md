@@ -2,7 +2,8 @@
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
-[![Streamlit](https://img.shields.io/badge/Streamlit-app-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://picking-route.streamlit.app/)
+[![Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](Dockerfile)
 
 In a **Distribution Centre (DC)**, walking time between locations during the picking route can account for 60%-70% of an operator’s working time. Reducing this walking time is the most effective way to increase your DC overall productivity.
@@ -21,7 +22,18 @@ SPRP is a specific application of the general **Travelling Salesman Problem (TSP
 
 This repo contains a ready-to-use **Streamlit App** designed for **Logistics Engineers** to test these different strategies with their own dataset of order line records _(see the expected data format in [Load the data](#load-the-data))_.
 
-## ⚡ Quick Start
+## 🌐 Live Streamlit Web Application
+
+Try the interactive Streamlit dashboard live in your browser:
+👉 **[picking-route.streamlit.app](https://picking-route.streamlit.app/)** *(No installation required)*
+
+To deploy your own live copy on **Streamlit Community Cloud**:
+1. Fork this repository: `https://github.com/piku020505/picking-route`
+2. Go to **[share.streamlit.io](https://share.streamlit.io/)** and click **New app**.
+3. Select repository `piku020505/picking-route`, branch `main`, and main file `app.py`.
+4. Click **Deploy!**
+
+## ⚡ Quick Start (Local Setup)
 
 **With [uv](https://docs.astral.sh/uv/) (manages Python and dependencies automatically):**
 ```bash

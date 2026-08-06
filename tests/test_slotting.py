@@ -4,6 +4,7 @@ import pandas as pd
 
 from utils.data.generator import generate_synthetic_orderlines
 from utils.slotting.slotting import (
+    evaluate_slotting_heuristics_interplay,
     evaluate_slotting_impact,
     perform_abc_analysis,
     reslot_skus,
@@ -35,3 +36,12 @@ def test_evaluate_slotting_impact():
     assert isinstance(df_compounding, pd.DataFrame)
     assert len(df_compounding) == 4
     assert 'Walking Distance (m)' in df_compounding.columns
+
+
+def test_evaluate_slotting_heuristics_interplay():
+    df_synth = generate_synthetic_orderlines(n_lines=60, n_orders=10, n_skus=8, seed=42)
+    df_interplay = evaluate_slotting_heuristics_interplay(df_synth)
+
+    assert isinstance(df_interplay, pd.DataFrame)
+    assert len(df_interplay) == 3
+    assert 'Re-slotting Gain (%)' in df_interplay.columns

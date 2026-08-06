@@ -5,7 +5,7 @@ import pandas as pd
 
 def distance_picking(Loc1, Loc2, y_low, y_high):
     '''Calculate Picker Route Distance between two locations'''
-	# Start Point
+    # Start Point
     x1, y1 = Loc1[0], Loc1[1]
     # End Point
     x2, y2 = Loc2[0], Loc2[1]
@@ -24,6 +24,7 @@ def distance_picking(Loc1, Loc2, y_low, y_high):
     distance = distance_x + distance_y
     return int(distance)
 
+
 def next_location(start_loc, list_locs, y_low, y_high):
     '''Find closest next location'''
     # Distance to every next points candidate
@@ -40,7 +41,7 @@ def next_location(start_loc, list_locs, y_low, y_high):
 def centroid(list_in):
     '''Centroid function'''
     x, y = [p[0] for p in list_in], [p[1] for p in list_in]
-    centroid = [round(sum(x) / len(list_in),2), round(sum(y) / len(list_in), 2)]
+    centroid = [round(sum(x) / len(list_in), 2), round(sum(y) / len(list_in), 2)]
     return centroid
 
 
@@ -52,16 +53,16 @@ def centroid_mapping(df_multi):
     df_group = pd.DataFrame(df_multi.groupby(['OrderNumber'])['Coord'].apply(list)).reset_index()
     # Calculate Centroid
     df_group['Coord_Centroid'] = df_group['Coord'].apply(centroid)
-    # Dictionnary for mapping
+    # Dictionary for mapping
     list_order, list_coord = list(df_group.OrderNumber.values), list(df_group.Coord_Centroid.values)
-    dict_coord = dict(zip(list_order, list_coord))
+    dict_coord = dict(zip(list_order, list_coord, strict=False))
     # Final mapping
     df_multi['Coord_Cluster'] = df_multi['OrderNumber'].map(dict_coord).astype(str)
     df_multi['Coord'] = df_multi['Coord'].astype(str)
     return df_multi
 
-def distance_picking_cluster(point1, point2):
 
+def distance_picking_cluster(point1, point2):
     y_low, y_high = 5.5, 50
     # Start Point
     x1, y1 = point1[0], point1[1]

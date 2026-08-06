@@ -10,18 +10,15 @@ from utils.cluster.simulation_cluster import simulation_cluster
 
 def run_sensitivity_analysis(
     df_orderlines: pd.DataFrame,
-    threshold_list: list[float] = [15, 25, 35, 45, 55],
+    threshold_list: list[float] | None = None,
     n_min: int = 1,
     n_max: int = 10,
     y_low: float = 5.5,
     y_high: float = 50.0,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    '''Run sensitivity matrix simulation across threshold values and wave sizes.
-
-    Returns:
-    - df_sensitivity: Dataframe with (threshold, orders_number, distance_method_1, distance_method_2, distance_method_3)
-    - df_optima: Summary Dataframe of optimal wave size N* for each threshold.
-    '''
+    '''Run sensitivity matrix simulation across threshold values and wave sizes.'''
+    if threshold_list is None:
+        threshold_list = [15, 25, 35, 45, 55]
     records = []
     optima_records = []
 
