@@ -357,6 +357,34 @@ Open the **🥈 Impact of batching method** tab and enable the toggle — this s
 
 The grouped bar chart in the screenshot above compares the three methods per wave size — 💡 this is the same graph as the one presented in the article.
 
+## 🚀 Advanced Operational Additions & Comparative Study
+
+This project includes 5 major operational and analytical extensions beyond standard simulation:
+
+### 1. 🥉 Routing Heuristics Comparative Benchmark
+- **Next Closest Location (Greedy)**: Iteratively visits nearest unvisited pick location.
+- **S-Shape (Serpentine) Routing**: Systematic aisle-by-aisle traversal alternating direction between cross-aisles.
+- **Return Routing**: Enters each picking aisle up to the furthest item and returns to the bottom cross-aisle.
+- **Comparative Benchmark**: Benchmarks all 3 strategies on identical wave datasets to identify the optimal routing heuristic.
+
+### 2. 💰 Financial & Operations Cost Layer
+- Translates physical walking distance (meters) into financial labor costs (₹) and workforce capacity:
+  - **Configurable Parameters**: Walking speed (m/s), hourly wage (₹/hr), shift duration, active pickers count.
+  - **Outputs**: Daily walking cost, daily/annual ₹ labor savings, hours saved, and extra order lines throughput capacity per shift.
+
+### 3. 🎛️ Sensitivity & Robustness Analysis
+- Evaluates how distance threshold variations (10m to 60m) shift the optimal wave size $N^*$.
+- Demonstrates operational flexibility across different warehouse layout scales.
+
+### 4. 🎯 ABC Slotting & Layout Optimization
+- **Pareto Demand Classification**: Categorizes SKUs into Class A (top 70% picks / ~20% SKUs), Class B, and Class C.
+- **Depot-Adjacent Re-slotting**: Re-assigns Class A SKUs to storage locations closest to depot `[0, y_low]`.
+- **Compounding Impact**: Demonstrates the multiplicative efficiency gains of combining SKU re-slotting with spatial order batching.
+
+### 5. 🎲 Synthetic Data Generator & Automated Test Suite
+- **Data Generator** (`utils/data/generator.py`): Generates custom order line datasets with Zipf/Pareto demand distribution.
+- **Pytest Suite** (`tests/`): 12 automated unit tests covering routing algorithms, financial cost calculations, sensitivity matrix, ABC slotting, and data generation.
+
 ## Development 🛠️
 
 Dev tooling is declared in the `dev` dependency group of `pyproject.toml`:
@@ -364,7 +392,7 @@ Dev tooling is declared in the `dev` dependency group of `pyproject.toml`:
 ```bash
 uv sync                  # install runtime + dev dependencies in .venv
 uv run ruff check .      # lint
-uv run pytest            # run tests (test suite in progress)
+uv run pytest            # run full automated unit test suite (12 tests)
 ```
 
 Useful dependency commands: `uv add <pkg>` / `uv remove <pkg>` (both update `uv.lock` automatically), `uv lock --upgrade` to refresh pinned versions.

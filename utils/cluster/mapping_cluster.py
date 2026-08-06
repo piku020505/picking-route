@@ -11,22 +11,22 @@ def df_mapping(df_orderlines, orders_number, distance_threshold, mono_method, mu
     clust_start = 0
 
     # Mapping for single line orders
-    if mono_method == 'clustering':		
-        df_type = 'df_mono' 	
-        dict_map, dict_omap, df_mono, waves_number, clust_idmax = clustering_mapping(df_mono, distance_threshold, 'custom', 
+    if mono_method == 'clustering':
+        df_type = 'df_mono'
+        dict_map, dict_omap, df_mono, waves_number, clust_idmax = clustering_mapping(df_mono, distance_threshold, 'custom',
             orders_number, wave_start, clust_start, df_type)
-    else: 
+    else:
         df_mono, waves_number = lines_mapping(df_mono, orders_number, 0)
-        clust_idmax = 0 
+        clust_idmax = 0
         # => Wave_start
     wave_start = waves_number
-    clust_start = clust_idmax 
+    clust_start = clust_idmax
 
     # Mapping for multi line orders
     if multi_method == 'clustering':
-        df_type = 'df_multi' 	
+        df_type = 'df_multi'
         df_multi = centroid_mapping(df_multi)
-        dict_map, dict_omap, df_multi, waves_number, clust_idmax  = clustering_mapping(df_multi, distance_threshold, 'custom', 
+        dict_map, dict_omap, df_multi, waves_number, clust_idmax  = clustering_mapping(df_multi, distance_threshold, 'custom',
             orders_number, wave_start, clust_start, df_type)
     else:
         df_multi, waves_number = lines_mapping(df_multi, orders_number, wave_start)

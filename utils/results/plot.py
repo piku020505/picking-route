@@ -85,3 +85,77 @@ def plot_simulation2(df_reswave, lines_number, distance_threshold):
         margin=dict(l=10, r=10, t=60, b=10),
     )
     st.plotly_chart(fig, width='stretch')
+
+
+def plot_heuristics_benchmark(df_bench):
+    '''Plot comparative routing heuristics (Next Closest vs S-Shape vs Return).'''
+    colors = ["#2a78d6", "#1baf7a", "#eb6834"]
+    fig = px.bar(
+        df_bench,
+        x='Wave Size',
+        y='Distance (m)',
+        color='Heuristic',
+        barmode='group',
+        color_discrete_sequence=colors,
+        labels={'Wave Size': 'Wave size (orders/wave)', 'Distance (m)': 'Total Walking Distance (m)'},
+    )
+    fig.update_traces(
+        marker_line_width=0,
+        hovertemplate='Heuristic: %{fullData.name}<br>Wave size: %{x}<br>Distance: %{y:,.0f} m<extra></extra>',
+    )
+    fig.update_xaxes(dtick=1)
+    fig.update_layout(
+        height=480,
+        barcornerradius=3,
+        bargap=0.2,
+        legend=dict(title=None, orientation='h', yanchor='bottom', y=1.02, x=0),
+        margin=dict(l=10, r=10, t=60, b=10),
+    )
+    st.plotly_chart(fig, width='stretch')
+
+
+def plot_sensitivity_heatmap(df_sensitivity):
+    '''Plot sensitivity heatmap of walking distance across distance thresholds & wave sizes.'''
+    pivot_df = df_sensitivity.pivot(
+        index='threshold', columns='orders_number', values='Method 3 (Cluster + Centroids)'
+    )
+    fig = px.imshow(
+        pivot_df,
+        labels=dict(x="Wave Size (orders/wave)", y="Distance Threshold (m)", color="Walking Distance (m)"),
+        x=pivot_df.columns,
+        y=pivot_df.index,
+        color_continuous_scale="Viridis",
+        aspect="auto",
+    )
+    fig.update_layout(
+        height=450,
+        margin=dict(l=10, r=10, t=40, b=10),
+    )
+    st.plotly_chart(fig, width='stretch')
+
+
+def plot_slotting_compounding(df_compounding):
+    '''Plot compounding efficiency gains of ABC slotting re-allocation + order batching.'''
+    colors = ["#d95926", "#3987e5", "#199e70", "#9b51e0"]
+    fig = px.bar(
+        df_compounding,
+        x='Scenario',
+        y='Walking Distance (m)',
+        color='Scenario',
+        color_discrete_sequence=colors,
+        text='Reduction vs Baseline (%)',
+    )
+    fig.update_traces(
+        texttemplate='-%{text:.1f}%',
+        textposition='outside',
+        marker_line_width=0,
+    )
+    fig.update_layout(
+        height=480,
+        showlegend=False,
+        barcornerradius=4,
+        margin=dict(l=10, r=10, t=50, b=10),
+        yaxis_title="Total Walking Distance (m)",
+        xaxis_title=None,
+    )
+    st.plotly_chart(fig, width='stretch')

@@ -51,3 +51,7 @@ select = ["E", "F", "W", "I", "UP", "B"]
 # F403/F405: star imports are pervasive in the current code base (see notes/01);
 # ignored until the explicit-imports refactor pass.
 ignore = ["F403", "F405"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

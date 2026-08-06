@@ -1,7 +1,6 @@
-import numpy as np
-import pandas as pd
-import ast 
 from ast import literal_eval
+
+import pandas as pd
 
 
 def distance_picking(Loc1, Loc2, y_low, y_high):
@@ -19,7 +18,7 @@ def distance_picking(Loc1, Loc2, y_low, y_high):
     else:
         distance_y1 = (y_high - y1) + (y_high - y2)
         distance_y2 = (y1 - y_low) + (y2 - y_low)
-    # Minimum distance on y-axis 
+    # Minimum distance on y-axis
     distance_y = min(distance_y1, distance_y2)
     # Total distance
     distance = distance_x + distance_y
@@ -29,12 +28,12 @@ def next_location(start_loc, list_locs, y_low, y_high):
     '''Find closest next location'''
     # Distance to every next points candidate
     list_dist = [distance_picking(start_loc, i, y_low, y_high) for i in list_locs]
-    # Minimum Distance 
+    # Minimum Distance
     distance_next = min(list_dist)
     # Location of minimum distance
     index_min = list_dist.index(min(list_dist))
-    next_loc = list_locs[index_min] 
-    list_locs.remove(next_loc) 
+    next_loc = list_locs[index_min]
+    list_locs.remove(next_loc)
     return list_locs, start_loc, next_loc, distance_next
 
 
@@ -44,7 +43,7 @@ def centroid(list_in):
     centroid = [round(sum(x) / len(list_in),2), round(sum(y) / len(list_in), 2)]
     return centroid
 
- 
+
 def centroid_mapping(df_multi):
     '''Mapping Centroids'''
     # Mapping multi
@@ -63,7 +62,7 @@ def centroid_mapping(df_multi):
 
 def distance_picking_cluster(point1, point2):
 
-    y_low, y_high = 5.5, 50 
+    y_low, y_high = 5.5, 50
     # Start Point
     x1, y1 = point1[0], point1[1]
     # End Point
@@ -77,7 +76,7 @@ def distance_picking_cluster(point1, point2):
     else:
         distance_y1 = (y_high - y1) + (y_high - y2)
         distance_y2 = (y1 - y_low) + (y2 - y_low)
-    # Minimum distance on y-axis 
+    # Minimum distance on y-axis
     distance_y = min(distance_y1, distance_y2)
     # Total distance
     distance = distance_x + distance_y

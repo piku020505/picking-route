@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 def process_lines(df_orderlines):
     ''' Processing of dataframe '''
     # Mapping Order lines
@@ -21,11 +22,11 @@ def process_lines(df_orderlines):
 
 def monomult_concat(df_mono, df_multi):
     ''' Concat mono-line and multi-lines orders'''
-    # Original Coordinate for mono 
+    # Original Coordinate for mono
     df_mono['Coord_Cluster'] = df_mono['Coord']
     # Dataframe Concatenation
     df_orderlines = pd.concat([df_mono, df_multi])
     # Counting number of Waves
-    waves_number = df_orderlines.WaveID.max() + 1
+    waves_number = int(df_orderlines.WaveID.max() + 1) if not df_orderlines.empty and pd.notna(df_orderlines.WaveID.max()) else 0
 
     return df_orderlines, waves_number

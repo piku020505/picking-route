@@ -1,5 +1,3 @@
-import numpy as np
-import pandas as pd
 import itertools
 from ast import literal_eval
 
@@ -12,7 +10,7 @@ def orderlines_mapping(df_orderlines, orders_number):
 	dict_map = dict(zip(list_orders, [i for i in range(1, len(list_orders))]))
 	# Order ID mapping
 	df_orderlines['OrderID'] = df_orderlines['OrderNumber'].map(dict_map)
-	# Grouping Orders by Wave of orders_number 
+	# Grouping Orders by Wave of orders_number
 	df_orderlines['WaveID'] = (df_orderlines.OrderID%orders_number == 0).shift(1).fillna(0).cumsum()
 	# Counting number of Waves
 	waves_number = df_orderlines.WaveID.max() + 1
