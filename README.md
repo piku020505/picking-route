@@ -14,7 +14,7 @@ In a **Distribution Centre (DC)**, walking time between locations during the pic
 > Fully extended, benchmarked, and expanded by **[piku020505](https://github.com/piku020505)** with comparative routing heuristics, financial cost models, sensitivity analysis, ABC demand slotting, 6,000 synthetic order line dataset generator, 13 pytest unit tests, and Streamlit interactive UI.
 
 <p align="center">
-  <img align="center" src="static/img/intro_1.gif" style="max-width: 75%; height: auto;">
+  <img align="center" src="static/img/scenario1_single_order_routes.png" style="max-width: 75%; height: auto;">
 </p>
 <p align="center"><b>Scenario 1:</b> Picking routes with 1 order picked per wave</p>
 
@@ -93,7 +93,7 @@ Based on your **actual warehouse layout**, storage locations are mapped with **2
 Every storage location must be linked to a Reference using Master Data. (For instance, reference #123129 is located in coordinate (xi, yi)). You can then associate every order line to a geographical location for picking.
 
 <p align="center">
-  <img align="center" src="static/img/processing_layout.png" style="max-width: 75%; height: auto;">
+  <img align="center" src="static/img/database_schema.png" style="max-width: 75%; height: auto;">
 </p>
 <p align="center">Database Schema</p>
 
@@ -107,7 +107,7 @@ _Simulating wave picking strategies to reduce operator walking distance._
 For this study, we will use an E-Commerce-type DC where items are stored on 4-level shelves. These shelves are organized in multiple rows (Row#: 1 … n) and aisles (Aisle#: A1 … A_n).
 
 <p align="center">
-  <img align="center" src="static/img/trolley.jpeg" style="max-width: 35%; height: auto;">
+  <img align="center" src="static/img/route_two_locations.png" style="max-width: 35%; height: auto;">
 </p>
 <p align="center">Different routes between two storage locations in the warehouse</p>
 
@@ -121,7 +121,7 @@ Scenario 1, the worst in terms of productivity, can be easily optimised because 
 - Single-line Orders: items_picked/walking_distance efficiency is very low
 
 <p align="center">
-  <img align="center" src="static/img/wave_picking.gif" style="max-width: 75%; height: auto;">
+  <img align="center" src="static/img/scenario2_wave_picking_route.png" style="max-width: 75%; height: auto;">
 </p>
 <p align="center"><b>Scenario 2:</b> Wave Picking applied to Scenario 1</p>
 
@@ -135,7 +135,7 @@ This system includes a set of core routing functions to simulate the picker's wa
 
 **Function:** Calculate the distance between two picking locations
 <p align="center">
-  <img align="center" src="static/img/batch_function_1.png" style="max-width: 75%; height: auto;">
+  <img align="center" src="static/img/route_two_locations.png" style="max-width: 75%; height: auto;">
 </p>
 <p align="center"><b>Function:</b> Different routes between two storage locations in the warehouse</p>
 
@@ -148,7 +148,7 @@ Objective: return the shortest walking distance between the two potential routes
 
 **Function:** The Next Closest Location
 <p align="center">
-  <img align="center" src="static/img/batch_function_2.png" style="max-width: 75%; height: auto;">
+  <img align="center" src="static/img/next_closest_location.png" style="max-width: 75%; height: auto;">
 </p>
 <p align="center"><b>Function:</b> Next Storage Location Scenario</p>
 
@@ -188,7 +188,7 @@ To estimate the impact of wave picking strategy on your productivity, we will ru
 ## 🧮**Experiment 2: Impacts of orders batching using spatial clusters of picking locations?**
 
 <p align="center">
-  <img align="center" src="static/img/cluster_process.png" style="max-width: 100%; height: auto;">
+  <img align="center" src="static/img/order_lines_processing_flow.png" style="max-width: 100%; height: auto;">
 </p>
 <p align="center"><b>Order Lines Processing</b> for Order Wave Picking using Clustering by Picking Location</p>
 
@@ -204,7 +204,7 @@ For this part we will split the orders in two categories:
 
 #### **Mono-line orders** 
 <p align="center">
-  <img align="center" src="static/img/cluster_walking_distance.png" style="max-width: 100%; height: auto;">
+  <img align="center" src="static/img/clustering_distance_methods.png" style="max-width: 100%; height: auto;">
 </p>
 <p align="center">Left [Clustering using Walking Distance] / Right [Clustering using Euclidian Distance]</p>
 
@@ -212,7 +212,7 @@ _Grouping orders in cluster within n meters of walking distance_
 
 #### **Multi-line orders** 
 <p align="center">
-  <img align="center" src="static/img/cluster_centroids.png" style="max-width: 75%; height: auto;">
+  <img align="center" src="static/img/centroid_example.png" style="max-width: 75%; height: auto;">
 </p>
 <p align="center"><b>Example: </b>Centroid of three Picking Locations</p>
 
@@ -227,13 +227,13 @@ To sum up, our model construction, see the chart below, we have several steps be
 
 At each step, we have a collection of parameters that can be tuned to improve performance:
 <p align="center">
-  <img align="center" src="static/img/cluster_analysis.png" style="max-width: 100%; height: auto;">
+  <img align="center" src="static/img/model_methodology.png" style="max-width: 100%; height: auto;">
 </p>
 <p align="center"><b>Methodology: </b>Model Construction with Parameters</p>
 
 #### **Comparing three methods of wave creation**
 <p align="center">
-  <img align="center" src="static/img/wave_creation.png" style="max-width: 75%; height: auto;">
+  <img align="center" src="static/img/three_wave_methods.png" style="max-width: 75%; height: auto;">
 </p>
 <p align="center"><b>Methodology: </b>Three Methods for Wave Processing</p>
 
