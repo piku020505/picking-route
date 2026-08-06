@@ -8,6 +8,11 @@
 
 In a **Distribution Centre (DC)**, walking time between locations during the picking route can account for 60%-70% of an operator’s working time. Reducing this walking time is the most effective way to increase your DC overall productivity.
 
+> **Attribution & Acknowledgments**:
+> Original concept and baseline wave batching simulation architecture based on open research by Samir Saci.
+> 
+> Fully extended, benchmarked, and expanded by **[piku020505](https://github.com/piku020505)** with comparative routing heuristics, financial cost models, sensitivity analysis, ABC demand slotting, 6,000 synthetic order line dataset generator, 13 pytest unit tests, and Streamlit interactive UI.
+
 <p align="center">
   <img align="center" src="static/img/intro_1.gif" style="max-width: 75%; height: auto;">
 </p>
