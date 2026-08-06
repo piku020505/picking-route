@@ -4,7 +4,7 @@ version = "1.0.0"
 description = "Streamlit app to improve warehouse productivity by simulating order batching and picking-route optimisation (Single Picker Routing Problem)"
 readme = "README.md"
 authors = [
-    { name = "piku020505" },
+    { name = "samirscai" },
 ]
 requires-python = ">=3.11"
 keywords = [
@@ -33,8 +33,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/piku020505/picking-route"
-Repository = "https://github.com/piku020505/picking-route"
+Homepage = "https://github.com/samirscai/picking-route"
+Repository = "https://github.com/samirscai/picking-route"
 
 [dependency-groups]
 dev = [

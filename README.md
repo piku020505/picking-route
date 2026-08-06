@@ -372,9 +372,9 @@ Useful dependency commands: `uv add <pkg>` / `uv remove <pkg>` (both update `uv.
 ## Contributing 🤝
 
 Contributions are welcome! Feel free to:
-- Open an [issue](https://github.com/piku020505/picking-route/issues) for bugs, questions or feature ideas
+- Open an [issue](https://github.com/samirscai/picking-route/issues) for bugs, questions or feature ideas
 - Submit a pull request — please describe the motivation and keep changes focused
 
 ## Author 👤
 
-Created & Maintained by [piku020505](https://github.com/piku020505).
+Created & Maintained by [samirscai](https://github.com/samirscai).

@@ -19,7 +19,7 @@ FROM python:3.12-slim-bookworm
 
 LABEL org.opencontainers.image.title="picking-route" \
       org.opencontainers.image.description="Warehouse order batching & picking-route optimisation Streamlit app" \
-      org.opencontainers.image.source="https://github.com/piku020505/picking-route"
+      org.opencontainers.image.source="https://github.com/samirscai/picking-route"
 
 # Run as an unprivileged user
 RUN groupadd --system app && useradd --system --gid app --create-home app
